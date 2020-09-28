@@ -9,12 +9,12 @@ type Extra = {
   errors?: Error[];
 } & Record<string, unknown>;
 
-type Entry = { level: Level; message: string; extra: Extra };
+type Entry = { level: Level; message: string; extra?: Extra };
 
 type LogFunc = (message: string, extra?: Extra) => void;
 
 type Log = {
-  currentExtra: Extra;
+  currentExtra?: Extra;
   formatter: Formatter;
   debug: LogFunc;
   info: LogFunc;
@@ -42,15 +42,19 @@ const jsonFormatter: Formatter = (entry: Entry) =>
   console.log(JSON.stringify(entry, replaceErrors));
 
 const write = (
-  message: string,
-  extra: Extra,
+  formatter: Formatter,
   level: Level,
-  formatter: Formatter
+  message: string,
+  extra?: Extra
 ) => formatter({ message, extra, level });
 
-const newLevelLoggers = (currentExtra: Extra, formatter: Formatter) => {
+const newLevelLoggers = (formatter: Formatter, currentExtra?: Extra) => {
+  const mergeExtra = (a?: Extra, b?: Extra) => {
+    return !(a || b) ? undefined : { ...a, ...b };
+  };
+
   const forLevel = (level: Level) => (message: string, extra?: Extra) =>
-    write(message, { ...currentExtra, ...extra }, level, formatter);
+    write(formatter, level, message, mergeExtra(currentExtra, extra));
 
   return Object.freeze({
     debug: forLevel(Level.debug),
@@ -62,9 +66,8 @@ const newLevelLoggers = (currentExtra: Extra, formatter: Formatter) => {
 
 export const newLog = (formatter = jsonFormatter): Log =>
   Object.freeze({
-    currentExtra: {},
     formatter,
-    ...newLevelLoggers({}, formatter),
+    ...newLevelLoggers(formatter),
   });
 
 export const logWith = (log: Log, extra: Extra): Log => {
@@ -72,11 +75,8 @@ export const logWith = (log: Log, extra: Extra): Log => {
   return Object.freeze({
     currentExtra: newExtra,
     formatter: log.formatter,
-    ...newLevelLoggers(newExtra, log.formatter),
+    ...newLevelLoggers(log.formatter, newExtra),
   });
 };
 
-export const { debug, info, warning, error } = newLevelLoggers(
-  {},
-  jsonFormatter
-);
+export const { debug, info, warning, error } = newLevelLoggers(jsonFormatter);
