@@ -1,13 +1,13 @@
 {
-  "name": "ts-core",
+  "name": "ts-log",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "run": "tsc && node dist/test.js",
-    "test": "jest src/index.spec.ts"
+    "test": "jest src/index.spec.ts",
+    "demo": "tsc && node dist/test.js"
   },
-  "author": "",
+  "author": "Andrew O'Connor",
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
