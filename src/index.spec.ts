@@ -15,6 +15,25 @@ describe("log", () => {
     );
   });
 
+  it.each([
+    [newLog().debug, "debug"],
+    [newLog().info, "info"],
+    [newLog().warning, "warning"],
+    [newLog().error, "error"],
+  ])("should log with correct level", (fn, level) => {
+    fn(`test for ${level}`);
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      `{"message":"test for ${level}","level":"${level}"}`
+    );
+  });
+
+  it("should log with correct level", () => {
+    const log = newLog();
+
+    log["debug"]("test debug");
+  });
+
   it("should log message and extra field", () => {
     newLog().debug("test", { fieldA: "a" });
 
