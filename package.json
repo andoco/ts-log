@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest src/index.spec.ts",
     "build": "tsc",
-    "demo": "tsc && node dist/test.js"
+    "demo": "tsc && node dist/demo.js"
   },
   "author": "Andrew O'Connor",
   "license": "ISC",
