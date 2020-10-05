@@ -15,6 +15,14 @@ describe("log", () => {
     );
   });
 
+  it("should log meta fields", () => {
+    newLog({ meta1: "test meta value" }).debug("test");
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      '{"message":"test","level":"debug","meta1":"test meta value"}'
+    );
+  });
+
   it.each([
     [newLog().debug, "debug"],
     [newLog().info, "info"],

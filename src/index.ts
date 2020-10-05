@@ -5,15 +5,18 @@ enum Level {
   error = "error",
 }
 
+type Meta = Record<string, unknown>;
+
 type Extra = {
   errors?: Error[];
 } & Record<string, unknown>;
 
-type Entry = { level: Level; message: string; extra?: Extra };
+type Entry = { level: Level; message: string; meta?: Meta; extra?: Extra };
 
 type LogFunc = (message: string, extra?: Extra) => void;
 
 type Log = {
+  meta?: Meta;
   currentExtra?: Extra;
   formatter: Formatter;
   debug: LogFunc;
@@ -39,22 +42,37 @@ const replaceErrors = (_key: string, value: unknown) => {
 };
 
 const jsonFormatter: Formatter = (entry: Entry) =>
-  console.log(JSON.stringify(entry, replaceErrors));
+  console.log(
+    JSON.stringify(
+      {
+        message: entry.message,
+        extra: entry.extra,
+        level: entry.level,
+        ...entry.meta,
+      },
+      replaceErrors
+    )
+  );
 
 const write = (
   formatter: Formatter,
   level: Level,
   message: string,
+  meta?: Meta,
   extra?: Extra
-) => formatter({ message, extra, level });
+) => formatter({ message, level, meta, extra });
 
-const newLevelLoggers = (formatter: Formatter, currentExtra?: Extra) => {
+const newLevelLoggers = (
+  formatter: Formatter,
+  meta?: Meta,
+  currentExtra?: Extra
+) => {
   const mergeExtra = (a?: Extra, b?: Extra) => {
     return !(a || b) ? undefined : { ...a, ...b };
   };
 
   const forLevel = (level: Level) => (message: string, extra?: Extra) =>
-    write(formatter, level, message, mergeExtra(currentExtra, extra));
+    write(formatter, level, message, meta, mergeExtra(currentExtra, extra));
 
   return Object.freeze({
     debug: forLevel(Level.debug),
@@ -64,10 +82,11 @@ const newLevelLoggers = (formatter: Formatter, currentExtra?: Extra) => {
   });
 };
 
-export const newLog = (formatter = jsonFormatter): Log =>
+export const newLog = (meta?: Meta, formatter = jsonFormatter): Log =>
   Object.freeze({
+    meta,
     formatter,
-    ...newLevelLoggers(formatter),
+    ...newLevelLoggers(formatter, meta),
   });
 
 export const logWith = (log: Log, extra: Extra): Log => {
@@ -75,7 +94,7 @@ export const logWith = (log: Log, extra: Extra): Log => {
   return Object.freeze({
     currentExtra: newExtra,
     formatter: log.formatter,
-    ...newLevelLoggers(log.formatter, newExtra),
+    ...newLevelLoggers(log.formatter, log.meta, newExtra),
   });
 };
 

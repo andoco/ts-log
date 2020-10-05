@@ -2,7 +2,7 @@ import { newLog, logWith, info } from "./index";
 
 info("default log");
 
-const log = logWith(newLog(), { application: "test-app" });
+const log = newLog({ application: "test-app" });
 log.debug("root");
 
 const childLog = logWith(log, { a: "test a" });
