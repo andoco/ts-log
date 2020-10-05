@@ -28,12 +28,6 @@ describe("log", () => {
     );
   });
 
-  it("should log with correct level", () => {
-    const log = newLog();
-
-    log["debug"]("test debug");
-  });
-
   it("should log message and extra field", () => {
     newLog().debug("test", { fieldA: "a" });
 
