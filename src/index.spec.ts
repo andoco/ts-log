@@ -28,6 +28,7 @@ describe("log", () => {
     [newLog().info, "info"],
     [newLog().warning, "warning"],
     [newLog().error, "error"],
+    [newLog().critical, "critical"],
   ])("should log with correct level", (fn, level) => {
     fn(`test for ${level}`);
 
@@ -67,6 +68,29 @@ describe("log", () => {
 
       expect(consoleSpy).toHaveBeenCalledWith(
         '{"message":"log with fields","extra":{"application":"test-app"},"level":"debug"}'
+      );
+    });
+
+    it("child should log with extra field and root meta field", () => {
+      const root = newLog({ application: "test-app" });
+      const child = logWith(root, { test1: "test extra value 1" });
+
+      child.debug("test message");
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '{"message":"test message","extra":{"test1":"test extra value 1"},"level":"debug","application":"test-app"}'
+      );
+    });
+
+    it("grandchild should log with extra field and root meta field", () => {
+      const root = newLog({ application: "test-app" });
+      const child = logWith(root, { test1: "test extra value 1" });
+      const grandchild = logWith(child, { test2: "test extra value 2" });
+
+      grandchild.debug("test message");
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '{"message":"test message","extra":{"test1":"test extra value 1","test2":"test extra value 2"},"level":"debug","application":"test-app"}'
       );
     });
   });

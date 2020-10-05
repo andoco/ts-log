@@ -3,6 +3,7 @@ enum Level {
   info = "info",
   warning = "warning",
   error = "error",
+  critical = "critical",
 }
 
 type Meta = Record<string, unknown>;
@@ -23,6 +24,7 @@ type Log = {
   info: LogFunc;
   warning: LogFunc;
   error: LogFunc;
+  critical: LogFunc;
 };
 
 type Formatter = (entry: Entry) => void;
@@ -79,6 +81,7 @@ const newLevelLoggers = (
     info: forLevel(Level.info),
     warning: forLevel(Level.warning),
     error: forLevel(Level.error),
+    critical: forLevel(Level.critical),
   });
 };
 
@@ -92,6 +95,7 @@ export const newLog = (meta?: Meta, formatter = jsonFormatter): Log =>
 export const logWith = (log: Log, extra: Extra): Log => {
   const newExtra = { ...log.currentExtra, ...extra };
   return Object.freeze({
+    meta: log.meta,
     currentExtra: newExtra,
     formatter: log.formatter,
     ...newLevelLoggers(log.formatter, log.meta, newExtra),

@@ -13,3 +13,7 @@ grandchildLog.debug("grandchild 1");
 grandchildLog.debug("grandchild 1 with extra", { c: "test c" });
 
 grandchildLog.error("Something bad", { errors: [new Error("test error")] });
+
+grandchildLog.critical("Some really bad", {
+  errors: [new Error("test critical error")],
+});
